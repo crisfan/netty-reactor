@@ -5,14 +5,12 @@
 
 package com.sankuai.jetty;
 
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.NetworkTrafficServerConnector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -26,22 +24,20 @@ import java.util.concurrent.Executors;
 public class JettyServerDemo {
     public static void main(String[] args) throws Exception {
         // worker threads
-        int w = 4;
+        int w = 5;
         // acceptor threads
         int a = 1;
         // selector threads
         int s = 2;
         QueuedThreadPool workers = new QueuedThreadPool(w);
-        Server server = new Server(workers);
+        Server server = new Server(8080);
 
         Executor executors = Executors.newFixedThreadPool(a + s);
         ServerConnector connector = new NetworkTrafficServerConnector(server, executors, null, null, a, s,
                 new HttpConnectionFactory());
+        connector.setPort(10086);
         connector.setHost("127.0.0.1");
-        connector.setPort(7777);
-
         server.addConnector(connector);
-
         ContextHandler btcHandler = new ContextHandler("/btc");
         btcHandler.setHandler(new MyHandlerDemo("world"));
 
