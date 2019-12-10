@@ -5,8 +5,10 @@
 
 package com.sankuai.io;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executor;
@@ -27,23 +29,24 @@ public class Server {
         ServerSocket serverSocket = new ServerSocket(10086);
 
         while (true){
+            System.out.println("waiting for new connection");
             Socket socket = serverSocket.accept();
-            System.out.println("new connection: " + socket.getInetAddress().getHostAddress());
+            System.out.println("got new connection: " + socket.getInetAddress().getHostAddress());
 
             executor.execute(() -> {
                 InputStream ins = null;
                 try{
                     ins = socket.getInputStream();
-                    readMsg(ins);
+                    readMsgWithLine(ins);
                 }catch (Exception e){
-                    System.out.println("读失败");
+                    System.out.println("read fail");
                 }finally {
                     try {
                         if(ins != null){
                             ins.close();
                         }
                     }catch (Exception e){
-                        System.out.println("关闭流失败");
+                        System.out.println("close ins error");
                     }
                 }
             });
@@ -69,6 +72,26 @@ public class Server {
                 continue;
             }
             sb.append(copyMsg);
+        }
+    }
+
+    private static void readMsgWithLine(InputStream ins) throws IOException{
+        StringBuilder sb = new StringBuilder();
+        BufferedReader br = new BufferedReader(new InputStreamReader(ins));
+        String line = null;
+        while ((line = br.readLine()) != null){
+            if("end".equals(line)){
+                System.out.println(sb.toString());
+                sb.delete(0, sb.length());
+                continue;
+            }
+
+            if("quit".equals(line)){
+                System.out.println("close connection");
+                break;
+            }
+
+            sb.append(line);
         }
     }
 }
