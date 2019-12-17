@@ -5,10 +5,7 @@
 
 package com.sankuai.io;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -37,7 +34,7 @@ public class Client {
             while ((n = br.read(msg)) != -1){
                 String copyMsg = new String(msg, 0, n);
                 ops.write(copyMsg.getBytes());
-                if("quit".equals(copyMsg)){
+                if("quit\n".equals(copyMsg)){
                     System.out.println("close connection");
                     break;
                 }

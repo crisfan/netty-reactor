@@ -7,6 +7,7 @@ package com.sankuai;
 
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 /**
@@ -39,5 +40,15 @@ public class BufferTest {
 
         // 如果没有元素了，继续读会抛错 BufferUnderflowException
         // System.out.println(intBuffer.get());
+    }
+
+    @Test
+    public void test_String_To_Buffer(){
+        ByteBuffer byteBuffer = ByteBuffer.allocate(3);
+
+        byte[] msg = new byte[]{'a', 'b', 'c', 'd', 'e', 'f', 'g'};
+
+        ByteBuffer newBuffer = byteBuffer.put(msg, 5, 1);
+        System.out.println(newBuffer);
     }
 }
