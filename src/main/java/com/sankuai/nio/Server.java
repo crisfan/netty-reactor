@@ -5,6 +5,8 @@
 
 package com.sankuai.nio;
 
+import org.eclipse.jetty.util.StringUtil;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -56,12 +58,11 @@ public class Server {
                     if(key.isReadable()){
                         SocketChannel channel = (SocketChannel)key.channel();
                         String msg = readMsg(channel);
-                        writeMsg(channel, msg);
-                    }
 
-                    // 2.3 如果可写，
-                    if(key.isWritable()){
-
+                        // 原样写回客户端
+                        if(StringUtil.isNotBlank(msg)){
+                            writeMsg(channel, msg);
+                        }
                     }
                 }catch (Exception e){
                     System.out.println("Exception happen in Server" + e);
@@ -117,9 +118,13 @@ public class Server {
         // 如果 byteBuffer 的大小 < 发送信息大小，分批发送
         if(msgBytes.length > byteBuffer.capacity()){
             while (start < msgBytes.length){
-                byteBuffer.put(msgBytes, start, len);
-                channel.write(byteBuffer);
+                // 切换为写模式
                 byteBuffer.clear();
+                byteBuffer.put(msgBytes, start, len);
+
+                // 切换为读模式
+                byteBuffer.flip();
+                channel.write(byteBuffer);
 
                 start += len;
                 len = Math.min(byteBuffer.capacity(), msgBytes.length - start);
@@ -128,8 +133,11 @@ public class Server {
         }
 
         // 如果 byteBuffer 的大小 >= 发送信息大小
-        byteBuffer.put(msgBytes, 0, msgBytes.length - 1);
-        channel.write(byteBuffer);
         byteBuffer.clear();
+        byteBuffer.put(msgBytes, 0, msgBytes.length - 1);
+
+        // 切换读模式
+        byteBuffer.flip();
+        channel.write(byteBuffer);
     }
 }

@@ -7,6 +7,7 @@ package com.sankuai;
 
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -24,6 +25,8 @@ public class BufferTest {
         IntBuffer intBuffer = IntBuffer.allocate(3);
         intBuffer.put(1);
         intBuffer.put(2);
+
+        intBuffer.flip();
         System.out.println(intBuffer);
 
         // 切换为读模式
