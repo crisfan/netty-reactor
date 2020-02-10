@@ -6,6 +6,7 @@
 package com.sankuai.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -21,20 +22,21 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  */
 public class NettyServer {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
+
+        // 设置并绑定Reactor线程池
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workGroup = new NioEventLoopGroup();
+
         try{
             // 1.创建服务端启动辅助类
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-
-            // 2.设置并绑定Reactor线程池
-            EventLoopGroup bossGroup = new NioEventLoopGroup();
-            EventLoopGroup workGroup = new NioEventLoopGroup();
             serverBootstrap.group(bossGroup, workGroup);
 
             // 3.设置并绑定服务端channel
             serverBootstrap.channel(NioServerSocketChannel.class);
 
-            // 4.
+            // 4...
             serverBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -42,12 +44,13 @@ public class NettyServer {
                 }
             });
 
-            serverBootstrap.bind(10086).sync();
-
+            ChannelFuture future = serverBootstrap.bind(10086).sync();
+            future.channel().closeFuture().sync();
         }catch (Exception e){
 
         }finally {
-
+            bossGroup.shutdownGracefully().sync();
+            workGroup.shutdownGracefully().sync();
         }
     }
 }
