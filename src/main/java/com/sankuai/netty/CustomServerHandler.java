@@ -23,13 +23,11 @@ import java.net.SocketAddress;
  */
 public class CustomServerHandler extends ChannelHandlerAdapter {
 
-    @Override
     public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress,
                         ChannelPromise promise) throws Exception {
         System.out.println("连接建立");
     }
 
-    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf byteBuf = (ByteBuf) msg;
 
@@ -40,7 +38,6 @@ public class CustomServerHandler extends ChannelHandlerAdapter {
         ctx.write(byteBuf);
     }
 
-    @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
