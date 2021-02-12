@@ -12,6 +12,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.FixedLengthFrameDecoder;
 
 /**
  * <p>
@@ -36,10 +37,11 @@ public class NettyServer {
             // 3.设置并绑定服务端channel
             serverBootstrap.channel(NioServerSocketChannel.class);
 
-            // 4...
+            // 4.设置handler
             serverBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel socketChannel) throws Exception {
+                    socketChannel.pipeline().addLast(new FixedLengthFrameDecoder(3));
                     socketChannel.pipeline().addLast(new CustomServerHandler());
                 }
             });

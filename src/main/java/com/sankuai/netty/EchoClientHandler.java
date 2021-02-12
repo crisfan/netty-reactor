@@ -17,21 +17,16 @@ import io.netty.util.CharsetUtil;
  * @author fanyuhao
  * @version :EchoClientHandler.java v1.0 2020/1/17 下午7:18 fanyuhao Exp $
  */
-public class EchoClientHandler extends SimpleChannelInboundHandler {
+public class EchoClientHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
         System.out.println("收到消息");
         super.channelRead(ctx, msg);
     }
 
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
 
-    }
-
-
-    protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void messageReceived(ChannelHandlerContext ctx, String msg) throws Exception {
         System.out.println("accept msg");
     }
 

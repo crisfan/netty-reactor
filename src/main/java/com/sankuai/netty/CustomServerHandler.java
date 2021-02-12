@@ -7,10 +7,7 @@ package com.sankuai.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
+import io.netty.channel.*;
 
 import java.net.SocketAddress;
 
@@ -21,13 +18,9 @@ import java.net.SocketAddress;
  * @author fanyuhao
  * @version :CustomServerHandler.java v1.0 2019/12/24 下午9:30 fanyuhao Exp $
  */
-public class CustomServerHandler extends ChannelHandlerAdapter {
+public class CustomServerHandler extends ChannelInboundHandlerAdapter {
 
-    public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress,
-                        ChannelPromise promise) throws Exception {
-        System.out.println("连接建立");
-    }
-
+    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf byteBuf = (ByteBuf) msg;
 
@@ -38,6 +31,7 @@ public class CustomServerHandler extends ChannelHandlerAdapter {
         ctx.write(byteBuf);
     }
 
+    @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
