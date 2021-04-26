@@ -11,13 +11,15 @@ import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
  * <p>
- *
+ *  NIO下的客户端
  * </p>
  * @author fanyuhao
  * @version :NIOClient.java v1.0 2019/12/9 下午11:27 fanyuhao Exp $
@@ -26,8 +28,23 @@ public class Client {
 
     public static void main(String[] args) throws Exception{
         SocketChannel channel = SocketChannel.open();
+
+        // 一定要开启非阻塞，否则还是读写还是阻塞模式
+        channel.configureBlocking(false);
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 10086);
-        channel.connect(address);
+
+        // 创建一个Selector，监听channel状态
+        Selector selector = Selector.open();
+        SelectionKey selectionKey = channel.register(selector, SelectionKey.OP_CONNECT);
+
+        // 异步建立连接
+        boolean connect = channel.connect(address);
+        if(connect){
+            // 虽然是异步建立连接，也可能直接就建立连接了
+            SelectionKey register = channel.register(selector, SelectionKey.OP_READ);
+
+
+        }
 
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
