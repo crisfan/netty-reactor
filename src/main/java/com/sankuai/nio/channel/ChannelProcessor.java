@@ -34,7 +34,12 @@ public class ChannelProcessor {
 
         // 注：socketChannel 在非阻塞模式下，如果#read返回0，说明channel中传输的数据已经被读完了
         StringBuilder serverMsg = new StringBuilder();
-        while (channel.read(byteBuffer) != 0 && channel.read(byteBuffer) != -1) {
+        while (true) {
+            int read = channel.read(byteBuffer);
+            if(read == 0 || read == -1){
+                break;
+            }
+
             time += 1;
 
             // 模式调整读模式，开始读

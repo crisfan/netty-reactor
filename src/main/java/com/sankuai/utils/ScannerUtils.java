@@ -2,7 +2,7 @@
  * meituan.com Inc.
  * Copyright (c) 2010-2021 All Rights Reserved.
  */
-package com.sankuai.nio.utils;
+package com.sankuai.utils;
 
 import java.util.Scanner;
 
