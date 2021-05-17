@@ -4,12 +4,9 @@
  */
 package com.sankuai.io.socket;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
-import java.nio.channels.SocketChannel;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 
 /**
  * <p>
@@ -27,31 +24,21 @@ public class SocketProcessor {
      * @throws IOException
      */
     public static String readFromSocket(Socket socket) throws IOException {
-        char[] msg = new char[4];
         InputStream ins = socket.getInputStream();
-
-        InputStreamReader reader = new InputStreamReader(ins);
-
-        int time = 0;
-        StringBuilder remoteMsg = new StringBuilder();
-        while (true) {
-            int read = reader.read(msg);
-            if(read == 0 || read == -1){
-                break;
-            }
-
-            time += 1;
-
-            remoteMsg.append(msg);
-            System.out.println("第" + time + "次读，发送的信息：" + Arrays.toString(msg));
-        }
-
-        return remoteMsg.toString();
+        BufferedReader br = new BufferedReader(new InputStreamReader(ins));
+        return br.readLine();
     }
 
 
-    public static void write2Channel(SocketChannel channel, String msg) throws IOException {
-
+    /**
+     * 向socket写数据
+     * @param socket
+     * @throws IOException
+     */
+    public static void write2Socket(Socket socket, String msg) throws IOException {
+        OutputStream ops = socket.getOutputStream();
+        ops.write(msg.getBytes(StandardCharsets.UTF_8));
+        ops.flush();
     }
 
 }

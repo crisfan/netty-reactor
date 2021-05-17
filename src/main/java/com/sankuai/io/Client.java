@@ -33,7 +33,7 @@ public class Client {
 
             while (true) {
                 String msg = ScannerUtils.getMsgFromTerminal();
-                ops.write(msg.getBytes());
+                SocketProcessor.write2Socket(socket, msg);
 
                 String serverMsg = SocketProcessor.readFromSocket(socket);
                 System.out.println("从服务端读到了如下信息:" + serverMsg);

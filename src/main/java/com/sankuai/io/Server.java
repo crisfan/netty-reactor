@@ -42,10 +42,9 @@ public class Server {
                         String clientMsg = SocketProcessor.readFromSocket(socket);
                         System.out.println("从客户端读到了如下信息:" + clientMsg);
 
-                        OutputStream ops = socket.getOutputStream();
                         String msg = ScannerUtils.getMsgFromTerminal();
                         System.out.println("从客户端写如下信息:" + msg);
-                        ops.write(msg.getBytes());
+                        SocketProcessor.write2Socket(socket, msg);
                     } catch (Exception e) {
                         System.out.println("服务端异常");
                     } finally {
