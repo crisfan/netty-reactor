@@ -2,11 +2,13 @@
  * meituan.com Inc.
  * Copyright (c) 2010-2021 All Rights Reserved.
  */
-package com.sankuai.io.socket;
+package com.sankuai.bio.socket;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Scanner;
 
 /**
  * <p>
@@ -19,14 +21,32 @@ import java.nio.charset.StandardCharsets;
 public class SocketProcessor {
 
     /**
-     * 从socket读数据
+     * 从socket读数据，默认读到'\r\n'结束
      * @param socket
      * @throws IOException
      */
     public static String readFromSocket(Socket socket) throws IOException {
+        // 初始化4个字节的缓存来缓存数据
+        byte[] buffer = new byte[4];
+
         InputStream ins = socket.getInputStream();
-        BufferedReader br = new BufferedReader(new InputStreamReader(ins));
-        return br.readLine();
+
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            int size = ins.read(buffer);
+            if(size == -1) {
+                // 对端已经关闭连接
+                throw new RuntimeException("对端已经关闭连接，别自作多情了");
+            }
+
+            String msg = new String(buffer, 0, size, StandardCharsets.UTF_8);
+            sb.append(msg);
+            if(msg.charAt(msg.length() - 1) == '\n') {
+                break;
+            }
+        }
+
+        return sb.toString();
     }
 
 

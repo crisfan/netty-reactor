@@ -21,8 +21,7 @@ public class ScannerUtils {
      * @return
      */
     public static String getMsgFromTerminal() {
-        System.out.println("请输入信息，并以回车结束！");
         Scanner scanner = new Scanner(System.in);
-        return scanner.nextLine();
+        return scanner.nextLine() + '\n';
     }
 }

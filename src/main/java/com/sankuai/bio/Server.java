@@ -3,9 +3,9 @@
  * Copyright (c) 2010-2019 All Rights Reserved.
  */
 
-package com.sankuai.io;
+package com.sankuai.bio;
 
-import com.sankuai.io.socket.SocketProcessor;
+import com.sankuai.bio.socket.SocketProcessor;
 import com.sankuai.utils.ScannerUtils;
 
 import java.io.*;
@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 
 /**
  * <p>
- * io server
+ * 同步IO服务端
  * </p>
  *
  * @author fanyuhao
@@ -24,36 +24,35 @@ import java.util.concurrent.Executors;
  */
 public class Server {
 
-    private static Executor executor = Executors.newFixedThreadPool(3);
+    private static final Executor executor = Executors.newFixedThreadPool(3);
 
     public static void main(String[] args) throws Exception {
         ServerSocket serverSocket = new ServerSocket(10086);
 
         while (true) {
-            System.out.println("waiting for new connection");
             Socket socket = serverSocket.accept();
-            System.out.println("got new connection: " + socket.getInetAddress().getHostAddress());
+            System.out.println("接收到一个新的连接: " + socket.getInetAddress().getHostAddress());
 
             executor.execute(() -> {
                 while (true) {
-                    InputStream ins = null;
                     try {
-                        ins = socket.getInputStream();
+                        // 1.先从客户端读消息
+                        System.out.println("等待客户端发送的消息");
                         String clientMsg = SocketProcessor.readFromSocket(socket);
-                        System.out.println("从客户端读到了如下信息:" + clientMsg);
+                        System.out.printf("从客户端读到了如下信息:%s", clientMsg);
 
+                        // 2.再向客户端写消息
+                        System.out.println("有什么话想对客户端说呢，输入完成后请回车结束！");
                         String msg = ScannerUtils.getMsgFromTerminal();
-                        System.out.println("从客户端写如下信息:" + msg);
+                        System.out.printf("向客户端写如下信息:%s", msg);
                         SocketProcessor.write2Socket(socket, msg);
                     } catch (Exception e) {
-                        System.out.println("服务端异常");
+                        System.out.printf("服务端异常:%s", e.getLocalizedMessage());
                     } finally {
                         try {
-                            if (ins != null) {
-                                ins.close();
-                            }
-                        } catch (Exception e) {
-                            System.out.println("close ins error");
+                            socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
