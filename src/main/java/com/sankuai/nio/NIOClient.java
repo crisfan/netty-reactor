@@ -50,12 +50,10 @@ public class NIOClient {
                 try {
                     if (key.isConnectable()) {
                         channel.finishConnect();
-                        key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT); // 取消监听连接就绪（否则selector会不断提醒连接就绪）
-
-                        key.interestOps(key.interestOps() | SelectionKey.OP_READ); // 连接已经建立了，监听可读
+                        // 注：取消监听连接就绪（否则selector会不断提醒连接就绪）
+                        key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT | SelectionKey.OP_READ);
 
                         String msg = ScannerUtils.getMsgFromTerminal();
-                        System.out.println("向服务端写如下信息:" + msg);
                         ChannelProcessor.write2Channel(channel, msg);
                     }
 

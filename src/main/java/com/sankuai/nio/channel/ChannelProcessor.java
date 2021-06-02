@@ -8,9 +8,7 @@ import io.netty.util.internal.StringUtil;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -30,27 +28,23 @@ public class ChannelProcessor {
     public static String readFromChannel(SocketChannel channel) throws IOException {
         // 每次只从channel内读4个字节，看看一共读了多少次
         ByteBuffer byteBuffer = ByteBuffer.allocate(4);
-        int time = 0;
 
-        // 注：socketChannel 在非阻塞模式下，如果#read返回0，说明channel中传输的数据已经被读完了
         StringBuilder serverMsg = new StringBuilder();
         while (true) {
-            int read = channel.read(byteBuffer);
-            if(read == 0 || read == -1){
+            // 切换到读模式
+            byteBuffer.clear();
+            int size = channel.read(byteBuffer);
+            if(size == 0 || size == -1){
+                /**
+                 *  注：socketChannel 在非阻塞模式下:
+                 *  如果#read返回0，说明channel中传输的数据已经被读完了;
+                 *  如果#read返回-1，说明连接已经被终端
+                 */
                 break;
             }
 
-            time += 1;
-
-            // 模式调整读模式，开始读
-            byteBuffer.flip();
-            Charset charset = StandardCharsets.UTF_8;
-            CharBuffer charBuffer = charset.decode(byteBuffer);
-            serverMsg.append(charBuffer);
-            System.out.println("第" + time + "次读，发送的信息：" + charBuffer);
-
-            // 模式调整为写模式，又可以向byteBuffer写
-            byteBuffer.clear();
+            String msg = new String(byteBuffer.array(), 0, size, StandardCharsets.UTF_8);
+            serverMsg.append(msg);
         }
 
         return serverMsg.toString();
@@ -70,11 +64,11 @@ public class ChannelProcessor {
         // 如果 byteBuffer 的大小 < 发送信息大小，分批发送
         if(msgBytes.length > byteBuffer.capacity()){
             while (start < msgBytes.length){
-                // 切换为写模式
+                // 切换为输入模式
                 byteBuffer.clear();
                 byteBuffer.put(msgBytes, start, len);
 
-                // 切换为读模式
+                // 切换为输出模式
                 byteBuffer.flip();
                 channel.write(byteBuffer);
 
@@ -82,16 +76,14 @@ public class ChannelProcessor {
                 len = Math.min(byteBuffer.capacity(), msgBytes.length - start);
             }
             return;
+        } else {
+            // 如果 byteBuffer 的大小 >= 发送信息大小
+            byteBuffer.clear();
+            byteBuffer.put(msgBytes, 0, msgBytes.length - 1);
+
+            // 切换输出模式
+            byteBuffer.flip();
+            channel.write(byteBuffer);
         }
-
-
-        // 如果 byteBuffer 的大小 >= 发送信息大小
-        byteBuffer.clear();
-        byteBuffer.put(msgBytes, 0, msgBytes.length - 1);
-
-        // 切换读模式
-        byteBuffer.flip();
-        channel.write(byteBuffer);
-        byteBuffer.clear();
     }
 }
