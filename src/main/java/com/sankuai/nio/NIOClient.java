@@ -8,6 +8,7 @@ package com.sankuai.nio;
 import com.sankuai.nio.channel.ChannelProcessor;
 import com.sankuai.utils.ScannerUtils;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -53,18 +54,26 @@ public class NIOClient {
                         // 注：取消监听连接就绪（否则selector会不断提醒连接就绪）
                         key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT | SelectionKey.OP_READ);
 
+                        key.attach(new StringBuilder());
+                        System.out.println("有什么话想对服务端说呢，输入完成后请回车结束！");
                         String msg = ScannerUtils.getMsgFromTerminal();
                         ChannelProcessor.write2Channel(channel, msg);
                     }
 
                     if (key.isReadable()) {
+                        StringBuilder receive = (StringBuilder) key.attachment();
                         String serverMsg = ChannelProcessor.readFromChannel(channel);
-                        System.out.println("从服务端读到了如下信息:" + serverMsg);
 
-                        String msg = ScannerUtils.getMsgFromTerminal();
+                        receive.append(serverMsg);
+                        if(serverMsg.charAt(serverMsg.length() - 1) == '\n') {
+                            // 已经读完服务端发送的一条信息
+                            System.out.printf("服务端给你发送了如下信息:%s，该你回复了哦，输入完成后请回车结束！", receive);
+                            receive.delete(0, receive.length());
 
-                        System.out.println("向服务端写如下信息:" + msg);
-                        ChannelProcessor.write2Channel(channel, msg);
+                            // 向服务端发送信息
+                            String msg = ScannerUtils.getMsgFromTerminal();
+                            ChannelProcessor.write2Channel(channel, msg);
+                        }
                     }
                 } catch (Throwable e) {
                     // 异常
